@@ -1,9 +1,10 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+db = SQLAlchemy()
 from flask_migrate import Migrate
+from .models import db
 from config import Config
 
-db = SQLAlchemy()
 migrate = Migrate()
 
 def create_app():
@@ -12,6 +13,11 @@ def create_app():
 
     db.init_app(app)
     migrate.init_app(app, db)
+
+    # --- Create tables ---
+    with app.app_context():
+        from .models import User, Record
+        db.create_all()
 
     from .auth import bp as auth_bp
     from .routes import bp as main_bp
