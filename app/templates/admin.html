@@ -4,9 +4,10 @@
 <a href="{{ url_for('auth.logout') }}" class="btn btn-primary mb-3">
         Logout
     </a>
+<a href="{{ url_for('main.add_record') }}" class="btn btn-primary mb-3">Add Record</a>
 <table class="table table-bordered">
     <thead>
-        <tr><th>ID</th><th>Name</th><th>Proogram</th><th>Year</th><th>Course</th></tr>
+        <tr><th>ID</th><th>Name</th><th>Proogram</th><th>Year</th><th>Course</th><th>Actions</th></tr>
     </thead>
     <tbody>
         {% for record in records %}
@@ -16,6 +17,10 @@
             <td>{{ record.program }}</td>
             <td>{{ record.year }}</td>
             <td>{{ record.course }}</td>
+            <td>
+                <a href="{{ url_for('main.edit_record', id=record.id) }}" class="btn btn-warning btn-sm">Edit</a>
+                <a href="{{ url_for('main.delete_record', id=record.id) }}" class="btn btn-danger btn-sm">Delete</a>
+            </td>
         </tr>
         {% endfor %}
     </tbody>

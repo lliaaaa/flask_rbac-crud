@@ -19,72 +19,62 @@ def dashboard():
 
 # --- Create Route ---
 @bp.route('/add', methods=['GET', 'POST'])
-def add_record():
+@role_required("admin")
+def add_record():   
     if request.method == 'POST':
         name = request.form['name'].strip()
-        program = request.form['program'].strip()
-        year = request.form['year'].strip()
-        course = request.form['course'].strip()
+        program = request.form['program']
+        year = request.form['year']
+        course = request.form['course']
 
         # --- Validation ---
-        if not name or not program or not year or not course:
+        if not name:
             flash('All fields are required!')
             return redirect(url_for('add_record'))
-
-        if any(char.isdigit() for char in name) or any(char.isdigit() for char in program) or any(char.isdigit() for char in course):
-            flash('Name, Program, and Course should not contain numbers!')
-            return redirect(url_for('add_record'))
-
-        if not year.isdigit():
-            flash('Year must be a number!')
-            return redirect(url_for('add_record'))
-
-        new_record = Record(name=name, program=program, year=int(year), course=course)
+        new_record = Record(name=name, program=program, year=year, course=course)
         db.session.add(new_record)
         db.session.commit()
         flash('Record added successfully!')
-        return redirect(url_for('main.dashboard'))
+        return redirect(url_for('main.admin'))
 
     return render_template('add.html')
 
 # --- Update Route ---
 @bp.route('/edit/<int:id>', methods=['GET', 'POST'])
+@role_required("admin")
 def edit_record(id):
     record = Record.query.get_or_404(id)
     if request.method == 'POST':
         name = request.form['name'].strip()
-        program = request.form['program'].strip()
-        year = request.form['year'].strip()
-        course = request.form['course'].strip()
-
+        program = request.form['program']
+        year = request.form['year']
+        course = request.form['course']
         # --- Validation ---
-        if not name or not program or not year or not course:
+        if not name:
             flash('All fields are required!')
             return redirect(url_for('edit_record', id=id))
-
-        if any(char.isdigit() for char in name) or any(char.isdigit() for char in program) or any(char.isdigit() for char in course):
-            flash('Name, Program, and Course should not contain numbers!')
-            return redirect(url_for('edit_record', id=id))
-
-        if not year.isdigit():
-            flash('Year must be a number!')
-            return redirect(url_for('edit_record', id=id))
-
         record.name = name
         record.program = program
         record.year = int(year)
         record.course = course
         db.session.commit()
         flash('Record updated successfully!')
-        return redirect(url_for('main.dashboard'))
+        return redirect(url_for('main.admin'))
 
     return render_template('edit.html', record=record)
 
 # --- Delete Route ---
 @bp.route('/delete/<int:id>')
+@role_required("admin")
 def delete_record(id):
     record = Record.query.get_or_404(id)
     db.session.delete(record)
     db.session.commit()
     flash('Record deleted successfully!')
-    return redirect(url_for('main.dashboard'))
+    return redirect(url_for('main.admin'))
+
+@bp.route('/admin')
+@role_required("admin")
+def admin():
+    records = Record.query.all()
+    return render_template('admin.html', records=records)
